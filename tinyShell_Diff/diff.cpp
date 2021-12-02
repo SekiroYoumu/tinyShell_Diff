@@ -65,6 +65,7 @@ int doDiff(int argc, char* argv[])
 	a = (char*)"ABCABBA";
 	b = (char*)"CBABAC";
 	int* v = new int[2 * (n + m) + 1];
+
 	memset(v, 0, (2 * (n + m) + 1) * sizeof(int));
 	v = &v[n + m];
 	int x, y;
