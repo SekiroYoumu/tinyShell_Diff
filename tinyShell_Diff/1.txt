@@ -1,0 +1,27 @@
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#define MAXLINE 200
+#define MAXFILE 1000000007
+using namespace std;
+struct Terminal {
+char user[MAXLINE]; // 用户名
+char mach[MAXLINE]; // 计算机名
+char root[MAXLINE]; // 根目录
+char wdir[MAXLINE]; // 工作目录
+char strin[MAXFILE]; // 重定向标准输入
+char strout[MAXFILE]; // 重定向标准输出
+};
+Terminal gTerm;
+
+
+void doDiff(int argc, char **argv)
+{
+    cout<<"successfully loaded!"<<endl;
+    cout<<argc<<argv[1]<<argv[2]<<endl;
+}
+int main(int argc, char **argv)
+{
+    doDiff(argc,argv);
+    return 0;
+}

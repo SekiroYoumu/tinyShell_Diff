@@ -9,7 +9,8 @@
 using namespace std;
 #define MAXLINE 512
 #define MAXFILE 4096
-
+#define MAX_LINE_LENGTH 1536
+#define MAX_LINE_COUNT 1536
 struct Terminal {
 	char user[MAXLINE]; // 用户名
 	char mach[MAXLINE]; // 计算机名
@@ -19,8 +20,13 @@ struct Terminal {
 	char strout[MAXFILE]; // 重定向标准输出
 };
 extern Terminal gTerm;
-
+struct LineRelation {
+	int x;
+	int y;
+	char op;
+};
 int readFileByLine(ifstream, char**);
+int readStrinByLine(char**);
 void copyPath(int*, int*, int);
 int doDiff(int, char* []);
 #endif
