@@ -1,27 +1,21 @@
-#include <iostream>
-#include <fstream>
-#include <cstring>
-#define MAXLINE 200
-#define MAXFILE 1000000007
-using namespace std;
-struct Terminal {
-char user[MAXLINE]; // 用户名
-char mach[MAXLINE]; // 计算机名
-char root[MAXLINE]; // 根目录
-char wdir[MAXLINE]; // 工作目录
-char strin[MAXFILE]; // 重定向标准输入
-char strout[MAXFILE]; // 重定向标准输出
-};
-Terminal gTerm;
-
-
-void doDiff(int argc, char **argv)
-{
-    cout<<"successfully loaded!"<<endl;
-    cout<<argc<<argv[1]<<argv[2]<<endl;
-}
-int main(int argc, char **argv)
-{
-    doDiff(argc,argv);
-    return 0;
-}
+Do not go gentle into that good night
+Dylan Thomas, 1914 - 1953
+Do not go gentle into that good night,
+Old age should burn and rave at close of day;
+Rage,rage against the dying of the light.
+Though wise men at their end know dark is right,
+Because their words had forked no lightning they
+Do not go gentle into that good night.
+Good men, the last wave by, crying how bright
+Their frail deeds might have danced in a green bay,
+Rage, rage against the dying of the light.
+Wild men who caught and sang the sun in flight,
+And learn, too late, they grieved it on its way,
+Do not go gentle into that good night.
+Grave men, near death, who see with blinding sight
+Blind eyes could blaze like meteors and be gay,
+Rage, rage against the dying of the light.
+And you, my father, there on the sad height,
+Curse, bless, me now with your fierce tears, I pray.
+Do not go gentle into that good night.
+Rage, rage against the dying of the light.
