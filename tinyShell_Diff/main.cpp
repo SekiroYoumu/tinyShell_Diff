@@ -12,6 +12,7 @@ int main()
 	cout << "Login:";
 	cin >> gTerm.user;
 	cin.ignore();
+	system("cls");
 	for (;;)
 	{
 		cout << "\033[92;1m" << gTerm.user << "@" << gTerm.mach << ":";
@@ -38,6 +39,11 @@ int main()
 			px++;
 		}
 		*px = '\0';
+		if (argc>0&&strcmp(argv[0], "clear") == 0)
+		{
+			system("cls");
+			continue;
+		}
 		doDiff(argc,argv);
 		cout << gTerm.strout;
 		memset(gTerm.strout, 0, MAXFILE * sizeof(char));

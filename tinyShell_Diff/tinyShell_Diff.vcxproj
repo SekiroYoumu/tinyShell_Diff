@@ -149,6 +149,8 @@
     <Text Include="2.txt" />
     <Text Include="3.txt" />
     <Text Include="4.txt" />
+    <Text Include="d1.txt" />
+    <Text Include="d2.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diffHeader.h" />

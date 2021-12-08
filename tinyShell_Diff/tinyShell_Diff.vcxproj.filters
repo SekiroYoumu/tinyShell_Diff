@@ -41,6 +41,12 @@
     <Text Include="4.txt">
       <Filter>资源文件</Filter>
     </Text>
+    <Text Include="d1.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="d2.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diffHeader.h">

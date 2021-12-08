@@ -56,28 +56,24 @@ int customStrcmp(char* a, char* b, diffios ios)
 				j++;
 			else if (a[i] > b[j]) return 1;
 			else if (a[i] < b[j]) return -1;
-			if (a[i] == '\0') enda = 1;
-			if (b[j] == '\0') endb = 1;
 		}
-		if (i != j)
+		if (i == 0 || j == 0)//说明有一个是空行
 		{
-			if (!ios.lb) return (i > j ? 1 : -1);
-			else
+			if (a[i] > b[j]) return 1;
+			else if (a[i] < b[j]) return -1;
+			else return 0;
+		}
+		if (ios.lb)
+		{
+			while (a[i] != '\0')
 			{
-				if (enda == 0)
-				{
-					for (; a[i] != '\0'; i++)
-					{
-						if (a[i] != 32) return 1;
-					}
-				}
-				if (endb == 0)
-				{
-					for (; b[j] != '\0'; i++)
-					{
-						if (b[j] != 32) return -1;
-					}
-				}
+				if (a[i] != 32) return 1;
+				i++;
+			}
+			while (b[j] != '\0')
+			{
+				if (b[j] != 32) return -1;
+				j++;
 			}
 		}
 		return 0;

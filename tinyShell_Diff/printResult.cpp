@@ -10,7 +10,7 @@ bool printResult(stack<LineRelation> line, char** a, char** b, int n, int m, dif
 		now = line.top();
 		if (ios.bl)//若-B,跳过空行
 		{
-			while ((strlen(a[now.x - 1]) == 0 || strlen(b[now.y - 1]) == 0))
+			while ((now.x>0&&strlen(a[now.x - 1]) == 0) || (now.y>0&&strlen(b[now.y - 1]) == 0))
 			{
 				line.pop();
 				if (line.size() == 0) return change;//栈空了，也没有还需要输出的行，故直接结束该函数
@@ -61,7 +61,7 @@ bool printResult(stack<LineRelation> line, char** a, char** b, int n, int m, dif
 					}
 					tmp = now;
 					now = line.top();
-				} while (ios.bl && (strlen(a[now.x - 1]) == 0 || strlen(b[now.y - 1]) == 0));//-B,则需判断下一行是否为空行，若是则跳过
+				} while (ios.bl && ((now.x > 0 && strlen(a[now.x - 1]) == 0) || (now.y > 0 && strlen(b[now.y - 1]) == 0)));//-B,则需判断下一行是否为空行，若是则跳过
 			}
 			int end_x = start.x;
 			int start_y = end.y;
@@ -145,7 +145,7 @@ bool printResult(stack<LineRelation> line, char** a, char** b, int n, int m, dif
 					line.pop();
 					if (line.size() == 0) break;
 					now = line.top();
-				} while (ios.bl && (strlen(a[now.x - 1]) == 0 || strlen(b[now.y - 1]) == 0));
+				} while (ios.bl && ((now.x > 0 && strlen(a[now.x - 1]) == 0) || (now.y > 0 && strlen(b[now.y - 1]) == 0)));
 			}
 			int end_y = start.y;
 			output_buffer.append(to_string(start.x));

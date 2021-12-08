@@ -36,7 +36,7 @@ int doDiff(int argc, char* argv[])
 	if (!checkValidity(argv[0],argv[1])) return -1;
 	if (strcmp(argv[1], "--help") == 0)
 	{
-		string help = "diff Usage: diff [OPTION]... FILES\nCompare FILES line by line.\n\nMandatory arguments to long options are mandatory for short options too.\n- q, report only when files differ\n i, ignore case differences in file contents\n - b, ignore changes in the amount of white space\n - w, ignore all white space\n - B, ignore changes where lines are all blank\n - I, ignore changes where all lines match RE\n--help               display this helpand exit\n\n% <  lines from FILE1\n%>  lines from FILE2\n\nFILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE' or 'FILE DIR'.\nIf a FILE is '-', read standard input.\nExit status is 0 if inputs are the same, 1 if different, -1 if trouble.\n\n";
+		string help = "diff Usage: diff [OPTION]... FILES\nCompare FILES line by line.\n\nMandatory arguments to long options are mandatory for short options too.\n- q, report only when files differ\n i, ignore case differences in file contents\n - b, ignore changes in the amount of white space\n - w, ignore all white space\n - B, ignore changes where lines are all blank\n - I, ignore changes where all lines match RE\n--help               display this helpand exit\n\n%<  lines from FILE1\n%>  lines from FILE2\n\nFILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE' or 'FILE DIR'.\nIf a FILE is '-', read standard input.\nExit status is 0 if inputs are the same, 1 if different, -1 if trouble.\n\n";
 		strcpy_s(gTerm.strout, help.length() + 1, help.c_str());
 		return 2;
 	}
@@ -220,7 +220,7 @@ loopend:;
 	bool change = printResult(line, diffSampleA, diffSampleB, n, m, ios);
 	if (change && ios.qk) //ÊÇ·ñÎª¼ò½àÊä³ö
 	{
-		sprintf_s(gTerm.strout, "Files %s and %s differ\n", filenameA.c_str(), filenameB.c_str());
+		sprintf_s(gTerm.strout, "Files %s and %s differ\n", argv[argc-2], argv[argc-1]);
 	}
 	delete[] result;
 	return change;
