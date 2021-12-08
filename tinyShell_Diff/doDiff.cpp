@@ -3,6 +3,8 @@
 /*格式化后的diff样本，按行分配，为避免局部变量的栈空间溢出而使用全局变量*/
 char* diffSampleA[MAX_LINE_COUNT];
 char* diffSampleB[MAX_LINE_COUNT];
+
+//将路径暂存以备回溯
 void copyPath(int* a, int* b, int d)
 {
 	for (int i = -d; i <= d; i++)
@@ -10,7 +12,9 @@ void copyPath(int* a, int* b, int d)
 		b[i] = a[i];
 	}
 	return;
-}//将路径暂存以备回溯
+}
+
+//检查即将使用的参数有效性
 bool checkValidity(char* last, char* check)
 {
 	if (check == NULL)
@@ -19,7 +23,9 @@ bool checkValidity(char* last, char* check)
 		return 0;
 	}
 	return 1;
-}//检查即将使用的参数有效性
+}
+
+//diff指令的主体函数,return -1错误，0无差别，1有差别，2从--help结束
 int doDiff(int argc, char* argv[])
 {
 	//1、命令读取与检验
@@ -94,7 +100,7 @@ int doDiff(int argc, char* argv[])
 	}
 	//2、文件读取
 	ifstream afile, bfile;
-	int n, m;
+	int sLenA, sLenB;
 	bool all_strin = 0;
 	string filenameA, filenameB;
 	if (!checkValidity(argv[argc - 3], argv[argc - 2])) return -1;
@@ -110,7 +116,7 @@ int doDiff(int argc, char* argv[])
 			cerr << "diff: " << filenameA << ": No such file or directory" << endl;
 			return -1;
 		}
-		n = readFileByLine(&afile, diffSampleA);
+		sLenA = readFileByLine(&afile, diffSampleA);
 	}
 	else
 	{
@@ -129,7 +135,7 @@ int doDiff(int argc, char* argv[])
 		cin.clear();
 		cin.sync();//清空cin流，避免影响后续读取
 
-		n = readStrinByLine(diffSampleA);
+		sLenA = readStrinByLine(diffSampleA);
 	}
 	if (!checkValidity(argv[argc - 2], argv[argc - 1])) return -1;
 	if (strcmp(argv[argc - 1], "-") != 0)
@@ -145,7 +151,7 @@ int doDiff(int argc, char* argv[])
 			cerr << "diff: " << filenameB << ": No such file or directory" << endl;
 			return -1;
 		}
-		m = readFileByLine(&bfile, diffSampleB);
+		sLenB = readFileByLine(&bfile, diffSampleB);
 	}
 	else
 	{
@@ -170,17 +176,19 @@ int doDiff(int argc, char* argv[])
 			cin.clear();
 			cin.sync();//清空cin流，避免影响后续读取
 
-			m = readStrinByLine(diffSampleB);
+			sLenB = readStrinByLine(diffSampleB);
 		}
 	}
 	//3、最短路径计算：Myers' 算法主体
-	int* v = new int[2 * (n + m) + 1];
-	memset(v, 0, (2 * (n + m) + 1) * sizeof(int));
-	v = &v[n + m];//算法需要，将v置于新开空间的中间，使其构成一个[-n-m,n+m]的区间
-	int x, y;
-	int k, d;
-	int** result = new int* [n + m + 1];
-	for (d = 0; d <= n + m; d++)//遍历起始点到当前点的距离d，寻找在该d下所能到达的最远位置
+	int* v = new int[2 * (sLenA + sLenB) + 1];
+	memset(v, 0, (2 * (sLenA + sLenB) + 1) * sizeof(int));
+	v = &v[sLenA + sLenB];//算法需要，将v置于新开空间的中间，使其构成一个[-sLenA-sLenB,sLenA+sLenB]的区间
+	int x; //x代表当前判断样本A的第x行
+	int y; //y代表当前判断样本B的第y行
+	int k; //k=x-y，代表x与y的偏移量
+	int d; //d代表从起点到当前位置的距离（即为编辑次数）
+	int** result = new int* [sLenA + sLenB + 1];
+	for (d = 0; d <= sLenA + sLenB; d++)//遍历起始点到当前点的距离d，寻找在该d下所能到达的最远位置
 	{
 		result[d] = new int[2 * d + 1];
 		memset(result[d], 0, (2 * d + 1) * sizeof(int));
@@ -193,20 +201,20 @@ int doDiff(int argc, char* argv[])
 			else
 				x = v[k - 1] + 1;//根据k和递推得到x与y
 			y = x - k;
-			while (x < n && y < m && customStrcmp(diffSampleA[x], diffSampleB[y], ios) == 0)//x,y相同，可沿斜线走
+			while (x < sLenA && y < sLenB && customStrcmp(diffSampleA[x], diffSampleB[y], ios) == 0)//x,y相同，可沿斜线走
 			{
 				x++;
 				y++;
 			}
 			v[k] = x;
-			if (x >= n && y >= m)
+			if (x >= sLenA && y >= sLenB)
 			{
 				goto loopend;//到达位置，退出多层循环
 			}
 		}
 	}
 loopend:;
-	v = &v[-n - m];//在删除空间之前使已偏移的指针回到原位
+	v = &v[-sLenA - sLenB];//在删除空间之前使已偏移的指针回到原位
 	delete[] v;
 	v = NULL;
 	//4、根据保存的结果回溯路线
@@ -248,10 +256,10 @@ loopend:;
 		result[d] = NULL;
 	}
 	delete[] result;
-	bool change = printResult(line, diffSampleA, diffSampleB, n, m, ios);
+	bool change = printResult(line, diffSampleA, diffSampleB, sLenA, sLenB, ios);
 	if (change && ios.qk) //是否为简洁输出
 	{
 		sprintf_s(gTerm.strout, "Files %s and %s differ\n", argv[argc - 2], argv[argc - 1]);
 	}
 	return change;
-}//Diff主体函数,return -1错误，0无差别，1有差别，2从--help结束
+}

@@ -1,6 +1,7 @@
 #pragma once
 #include "diffHeader.h"
-bool printResult(stack<LineRelation> line, char** a, char** b, int n, int m, diffios ios)//通过调用栈获得结果输出
+//通过调用栈获得结果输出
+bool printResult(stack<LineRelation> line, char** a, char** b, int n, int m, diffios ios)
 {
 	string output_buffer; //用string模拟strout的缓冲区
 	LineRelation now;//now代表行间关系栈顶

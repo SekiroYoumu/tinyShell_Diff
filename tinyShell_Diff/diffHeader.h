@@ -11,7 +11,7 @@ using namespace std;
 #define MAXFILE 32768
 #define MAX_LINE_LENGTH 4096
 #define MAX_LINE_COUNT 16384
-
+//结构体声明
 struct Terminal {
 	char user[MAXLINE]; // 用户名
 	char mach[MAXLINE]; // 计算机名
