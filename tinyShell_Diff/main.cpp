@@ -1,11 +1,47 @@
 #include "diffHeader.h"
 Terminal gTerm;
-int main(int argc, char* argv[])
+int main()
 {
-	for (int i = 0; i < argc; i++)
-		printf("Parameter %d is %s.\n", i, argv[i]);
-	cout << "Input Work directory:";
-	cin >> gTerm.wdir;
+	/*for (int i = 0; i < argc; i++)
+		printf("Parameter %d is %s.\n", i, argv[i]);*/
+	char input_buffer[MAXLINE];
+	cout << "Machine Name:";
+	cin >> gTerm.mach;
+	cout << "Root Directory:";
+	cin >> gTerm.root;
+	cout << "Login:";
+	cin >> gTerm.user;
+	cin.ignore();
+	for (;;)
+	{
+		cout << "\033[92;1m" << gTerm.user << "@" << gTerm.mach << ":";
+		cout << "\033[94;1m" << gTerm.wdir << '/' << "\033[0m" << "$";
+		cin.getline(input_buffer, MAXLINE);
+		int argc = 0;
+		char* argv[10];
+		memset(argv, NULL, 10 * sizeof(char*));
+		char* px = input_buffer;
+		bool newarg = 1;
+		while (*px != '\0')
+		{
+			if (newarg) 
+			{
+				argv[argc] = px;
+				argc++;
+				newarg = 0;
+			}
+			if (*px == ' ')
+			{
+				*px = '\0';
+				newarg = 1;
+			}
+			px++;
+		}
+		*px = '\0';
+		doDiff(argc,argv);
+		cout << gTerm.strout;
+		memset(gTerm.strout, 0, MAXFILE * sizeof(char));
+	}
 	/*
 	* cout<<"Input strin:";
 	char* px = gTerm.strin;
@@ -17,8 +53,6 @@ int main(int argc, char* argv[])
 		px++;
 	}
 	cout << gTerm.strin << endl;*/
-	doDiff(argc-1, ++argv);
-	cout << gTerm.strout << endl;
 	system("pause");
 	return 0;
 }

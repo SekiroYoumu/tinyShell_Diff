@@ -28,20 +28,20 @@ struct LineRelation {
 };//经主体函数判断得出的行间关系
 struct diffios
 {
-	bool st;//是否为标准输出
-	bool ud;//是否忽略大小写
-	bool lb;//是否忽略行末空格
-	bool wb;//是否忽略所有空格
-	bool bl;//是否忽略空行
-	bool qk;//是否只显示有无不同
-	bool I;//是否指定特定字符串
+	bool st = 1;//是否为标准输出
+	bool ud = 0;//是否忽略大小写
+	bool lb = 0;//是否忽略行末空格
+	bool wb = 0;//是否忽略所有空格
+	bool bl = 0;//是否忽略空行
+	bool qk = 0;//是否只显示有无不同
+	bool I = 0;//是否指定特定字符串
 	string target;
 };//diff输入输出形式的封装
 
 extern Terminal gTerm;
 int readFileByLine(ifstream*, char**);
 int readStrinByLine(char**);
-int customStrcmp(char*, char*,diffios);
+int customStrcmp(char*, char*, diffios);
 int doDiff(int, char* []);
-bool printResult(stack<LineRelation>, char**, char**, int, int,diffios);
+bool printResult(stack<LineRelation>, char**, char**, int, int, diffios);
 #endif

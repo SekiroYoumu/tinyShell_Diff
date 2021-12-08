@@ -10,17 +10,30 @@ void copyPath(int* a, int* b, int d)
 	}
 	return;
 }//将路径暂存以备回溯
-
+bool checkValidity(char *last, char *check)
+{
+	if (check == NULL)
+	{
+		cerr << "diff: missing operand after '" << last << "'" << endl << "diff: Try 'diff --help' for more information." << endl;
+		return 0;
+	}
+	return 1;
+}//检查即将使用的参数有效性
 int doDiff(int argc, char* argv[]) 
 {
 	//1、命令读取与检验
 	diffios ios;//输出模式参数初始化
-	ios.st = 1; ios.ud = 0; ios.lb = 0; ios.wb = 0; ios.qk = 0; ios.bl = 0; ios.I = 0;
-	if (strcmp(argv[0], "diff") != 0)
+	if (argv[0] == NULL)
 	{
-		cerr << "Debug error:Wrong citation or wrong !:(" << endl;
+		cerr << "Debug error:invalid augment !:(" << endl;
 		return -1;
 	}
+	if (strcmp(argv[0], "diff") != 0)
+	{
+		cerr << "Debug error:Wrong citation or invalid augment!:(" << endl;
+		return -1;
+	}
+	if (!checkValidity(argv[0],argv[1])) return -1;
 	if (strcmp(argv[1], "--help") == 0)
 	{
 		string help = "diff Usage: diff [OPTION]... FILES\nCompare FILES line by line.\n\nMandatory arguments to long options are mandatory for short options too.\n- q, report only when files differ\n i, ignore case differences in file contents\n - b, ignore changes in the amount of white space\n - w, ignore all white space\n - B, ignore changes where lines are all blank\n - I, ignore changes where all lines match RE\n--help               display this helpand exit\n\n% <  lines from FILE1\n%>  lines from FILE2\n\nFILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE' or 'FILE DIR'.\nIf a FILE is '-', read standard input.\nExit status is 0 if inputs are the same, 1 if different, -1 if trouble.\n\n";
@@ -30,6 +43,7 @@ int doDiff(int argc, char* argv[])
 	for (int i = 1; i < argc - 2; i++)//逐个检验参数及其有效性
 	{
 		bool errorFlag = 1;
+		if (!checkValidity(argv[i-1],argv[i])) return -1;
 		if (!ios.ud && (strcmp(argv[i], "-i") == 0))
 		{
 			ios.st = 0;
@@ -48,6 +62,11 @@ int doDiff(int argc, char* argv[])
 			ios.wb = 1;
 			errorFlag = 0;
 		}
+		else if (!ios.bl && (strcmp(argv[i], "-B") == 0))
+		{
+			ios.bl = 1;
+			errorFlag = 0;
+		}
 		else if (!ios.qk && (strcmp(argv[i], "-q") == 0))
 		{
 			ios.qk = 1;
@@ -60,7 +79,7 @@ int doDiff(int argc, char* argv[])
 			i++;
 			if (i == argc - 2)
 			{
-				cerr << "diff: missing operand after '-I'" << endl << "diff: Try 'diff --help' for more information." << endl;
+				cerr << "diff: missing operand after '" <<argv[i] <<"'"<< endl << "diff: Try 'diff --help' for more information." << endl;
 				return -1;
 			}
 			else ios.target = argv[i];
@@ -75,9 +94,12 @@ int doDiff(int argc, char* argv[])
 	int n, m;
 	bool all_strin = 0;
 	string filenameA,filenameB;
+	if (!checkValidity(argv[argc-3],argv[argc-2])) return -1;
 	if (strcmp(argv[argc - 2], "-") != 0)
 	{
-		filenameA = gTerm.wdir;
+		filenameA = gTerm.root;
+		filenameA.append(1, '/');
+		filenameA.append(gTerm.wdir);
 		filenameA.append(1, '/');
 		filenameA.append(argv[argc - 2]);
 		afile.open(filenameA);
@@ -93,9 +115,12 @@ int doDiff(int argc, char* argv[])
 		all_strin = 1;
 		n = readStrinByLine(diffSampleA);
 	}
+	if (!checkValidity(argv[argc-2],argv[argc - 1])) return -1;
 	if (strcmp(argv[argc - 1], "-") != 0)
 	{
-		filenameB = gTerm.wdir;
+		filenameB = gTerm.root;
+		filenameB.append(1, '/');
+		filenameB.append(gTerm.wdir);
 		filenameB.append(1, '/');
 		filenameB.append(argv[argc - 1]);
 		bfile.open(filenameB);
@@ -195,7 +220,7 @@ loopend:;
 	bool change = printResult(line, diffSampleA, diffSampleB, n, m, ios);
 	if (change && ios.qk) //是否为简洁输出
 	{
-		sprintf_s(gTerm.strout, "Files %s and %s differ", filenameA.c_str(), filenameB.c_str());
+		sprintf_s(gTerm.strout, "Files %s and %s differ\n", filenameA.c_str(), filenameB.c_str());
 	}
 	delete[] result;
 	return change;
