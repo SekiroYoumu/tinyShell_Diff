@@ -10,7 +10,7 @@ void copyPath(int* a, int* b, int d)
 	}
 	return;
 }//将路径暂存以备回溯
-bool checkValidity(char *last, char *check)
+bool checkValidity(char* last, char* check)
 {
 	if (check == NULL)
 	{
@@ -19,7 +19,7 @@ bool checkValidity(char *last, char *check)
 	}
 	return 1;
 }//检查即将使用的参数有效性
-int doDiff(int argc, char* argv[]) 
+int doDiff(int argc, char* argv[])
 {
 	//1、命令读取与检验
 	diffios ios;//输出模式参数初始化
@@ -33,7 +33,7 @@ int doDiff(int argc, char* argv[])
 		cerr << "Debug error:Wrong citation or invalid augment!:(" << endl;
 		return -1;
 	}
-	if (!checkValidity(argv[0],argv[1])) return -1;
+	if (!checkValidity(argv[0], argv[1])) return -1;
 	if (strcmp(argv[1], "--help") == 0)
 	{
 		string help = "diff Usage: diff [OPTION]... FILES\nCompare FILES line by line.\n\nMandatory arguments to long options are mandatory for short options too.\n- q, report only when files differ\n i, ignore case differences in file contents\n - b, ignore changes in the amount of white space\n - w, ignore all white space\n - B, ignore changes where lines are all blank\n - I, ignore changes where all lines match RE\n--help               display this helpand exit\n\n%<  lines from FILE1\n%>  lines from FILE2\n\nFILES are 'FILE1 FILE2' or 'DIR1 DIR2' or 'DIR FILE' or 'FILE DIR'.\nIf a FILE is '-', read standard input.\nExit status is 0 if inputs are the same, 1 if different, -1 if trouble.\n\n";
@@ -43,7 +43,7 @@ int doDiff(int argc, char* argv[])
 	for (int i = 1; i < argc - 2; i++)//逐个检验参数及其有效性
 	{
 		bool errorFlag = 1;
-		if (!checkValidity(argv[i-1],argv[i])) return -1;
+		if (!checkValidity(argv[i - 1], argv[i])) return -1;
 		if (!ios.ud && (strcmp(argv[i], "-i") == 0))
 		{
 			ios.st = 0;
@@ -79,22 +79,22 @@ int doDiff(int argc, char* argv[])
 			i++;
 			if (i == argc - 2)
 			{
-				cerr << "diff: missing operand after '" <<argv[i] <<"'"<< endl << "diff: Try 'diff --help' for more information." << endl;
+				cerr << "diff: missing operand after '" << argv[i] << "'" << endl << "diff: Try 'diff --help' for more information." << endl;
 				return -1;
 			}
 			else ios.target = argv[i];
 		}
-		if (errorFlag) 
+		if (errorFlag)
 		{
-			cerr << "diff: invalid option -- "<<argv[i] << endl << "diff: Try 'diff --help' for more information." << endl;
+			cerr << "diff: invalid option -- " << argv[i] << endl << "diff: Try 'diff --help' for more information." << endl;
 			return -1;
 		}
 	}
 	ifstream afile, bfile;
 	int n, m;
 	bool all_strin = 0;
-	string filenameA,filenameB;
-	if (!checkValidity(argv[argc-3],argv[argc-2])) return -1;
+	string filenameA, filenameB;
+	if (!checkValidity(argv[argc - 3], argv[argc - 2])) return -1;
 	if (strcmp(argv[argc - 2], "-") != 0)
 	{
 		filenameA = gTerm.root;
@@ -113,9 +113,24 @@ int doDiff(int argc, char* argv[])
 	else
 	{
 		all_strin = 1;
+		//debug：由于没有strin传入，故需要自己输入！
+		memset(gTerm.strin, 0, MAXFILE * sizeof(char));
+		cout << "Debug: Input strin:";
+		char* px = gTerm.strin;
+		while (1)
+		{
+			char ch = cin.get();
+			if (ch == EOF) break;
+			*px = ch;
+			px++;
+		}
+		cin.clear();
+		cin.sync();
+		cout << "Debug: strin check:"<<endl<<gTerm.strin;
+
 		n = readStrinByLine(diffSampleA);
 	}
-	if (!checkValidity(argv[argc-2],argv[argc - 1])) return -1;
+	if (!checkValidity(argv[argc - 2], argv[argc - 1])) return -1;
 	if (strcmp(argv[argc - 1], "-") != 0)
 	{
 		filenameB = gTerm.root;
@@ -138,7 +153,25 @@ int doDiff(int argc, char* argv[])
 			cerr << "diff: two files from standard input stream is not supported" << endl;
 			return -1;
 		}
-		else m = readStrinByLine(diffSampleB);
+		else
+		{
+			//debug：由于没有strin传入，故需要自己输入！
+			memset(gTerm.strin, 0, MAXFILE * sizeof(char));
+			cout << "Debug: Input strin:";
+			char* px = gTerm.strin;
+			while (1)
+			{
+				char ch = cin.get();
+				if (ch == EOF) break;
+				*px = ch;
+				px++;
+			}
+			cout << "Debug: strin check:" << endl << gTerm.strin;
+			cin.clear();
+			cin.sync();
+
+			m = readStrinByLine(diffSampleB);
+		}
 	}
 	int* v = new int[2 * (n + m) + 1];
 	memset(v, 0, (2 * (n + m) + 1) * sizeof(int));
@@ -160,7 +193,7 @@ int doDiff(int argc, char* argv[])
 			else
 				x = v[k - 1] + 1;
 			y = x - k;
-			while (x < n && y < m && customStrcmp(diffSampleA[x], diffSampleB[y],ios) == 0)
+			while (x < n && y < m && customStrcmp(diffSampleA[x], diffSampleB[y], ios) == 0)
 			{
 				x++;
 				y++;
@@ -220,7 +253,7 @@ loopend:;
 	bool change = printResult(line, diffSampleA, diffSampleB, n, m, ios);
 	if (change && ios.qk) //是否为简洁输出
 	{
-		sprintf_s(gTerm.strout, "Files %s and %s differ\n", argv[argc-2], argv[argc-1]);
+		sprintf_s(gTerm.strout, "Files %s and %s differ\n", argv[argc - 2], argv[argc - 1]);
 	}
 	delete[] result;
 	return change;

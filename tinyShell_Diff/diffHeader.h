@@ -1,5 +1,4 @@
 #pragma once
-#pragma comment(linker, "/STACK:1048576")
 #ifndef _HEADER_H_
 #define _HEADER_H_
 #include <iostream>
