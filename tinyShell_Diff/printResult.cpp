@@ -1,30 +1,44 @@
 #pragma once
-#include "header.h"
-void printResult(stack<LineRelation> line, char** a, char** b, int n, int m,bool ignoreBl)
+#include "diffHeader.h"
+bool printResult(stack<LineRelation> line, char** a, char** b, int n, int m, diffios ios)
 {
 	string output_buffer; //用string模拟strout的缓冲区
-	LineRelation now;
+	LineRelation now;//代表行间关系栈顶
+	bool change = 0;
 	while (line.size() > 0)
 	{
 		now = line.top();
+		if (ios.bl)//若-B,跳过空行
+		{
+			while ((strlen(a[now.x - 1]) == 0 || strlen(b[now.y - 1]) == 0))
+			{
+				line.pop();
+				if (line.size() == 0) return change;//栈空了，也没有还需要输出的行，故直接结束该函数
+				now = line.top();
+			}
+		}
 		/*由算法规则可知，一定先删除再新增，故“更改”情形在首位为d时讨论*/
 		if (now.op == 'd') //首先出现的为d
 		{
+			if (!ios.I)
+				change = 1;
 			char op = 'd';
 			bool dflag = 0, aflag = 0;
 			LineRelation start, add_start, end, tmp;
 			start = now;
 			while (line.size() > 0)
 			{
-				tmp = now;
-				now = line.top();
 				if (now.op == 'd')
 				{
+					if (!ios.I)
+						change = 1;
 					if (now.x != start.x)
 						dflag = 1;
 				}
 				else if (now.op == 'a')
 				{
+					if (!ios.I)
+						change = 1;
 					if (aflag == 0)
 					{
 						op = 'c';
@@ -37,16 +51,21 @@ void printResult(stack<LineRelation> line, char** a, char** b, int n, int m,bool
 					end = tmp;
 					break;
 				}
-				line.pop();
-				if (line.size() == 0)
+				do
 				{
-					end = now;
-					break;
-				}
+					line.pop();
+					if (line.size() == 0)//如果弹栈后栈已空，代表已没有区别行，故退出循环
+					{
+						end = now;
+						break;
+					}
+					tmp = now;
+					now = line.top();
+				} while (ios.bl && (strlen(a[now.x - 1]) == 0 || strlen(b[now.y - 1]) == 0));//-B,则需判断下一行是否为空行，若是则跳过
 			}
 			int end_x = start.x;
 			int start_y = end.y;
-			output_buffer.append(to_string(start.x));
+			output_buffer.append(to_string(start.x));//用string.append函数向缓冲区中添加字符（串），并等待输出
 			if (dflag == 1)
 			{
 				if (aflag == 1)  end_x = add_start.x;
@@ -83,21 +102,50 @@ void printResult(stack<LineRelation> line, char** a, char** b, int n, int m,bool
 				if (end.y == m)
 					output_buffer.append("\\ No newline at end of file\n");
 			}
-			strcat_s(gTerm.strout, output_buffer.c_str());//缓冲区推出
-			output_buffer = "";//缓冲区清空
+			if (ios.I)//若要求每一行都包含特定字符串，则对已记录变化的行进行遍历
+			{
+				if (!change) for (int i = start.x; i <= end_x; i++)
+				{
+					if (strstr(a[i-1], ios.target.c_str()) == NULL)
+					{
+						change = 1;
+						break;
+					}
+				}
+				if (!change) for (int i = start_y; i <= end.y; i++)
+				{
+					if (strstr(b[i-1], ios.target.c_str()) == NULL)
+					{
+						change = 1;
+						break;
+					}
+				}
+			}
+			if (!ios.qk && !ios.I)//若对输出无要求，则直接输出
+			{
+				strcat_s(gTerm.strout, output_buffer.c_str());//缓冲区推出
+				output_buffer = "";//缓冲区清空
+			}
 		}
 		else if (now.op == 'a')//首先出现的为a，由算法规则可知后续相邻的一定全是a
 		{
+			if (!ios.I)
+				change = 1;
 			LineRelation start, tmp;
 			start = now;
 			tmp = now;
 			while (line.size() > 0)
 			{
-				now = line.top();
 				if (now.op != 'a') break;
+				if (!ios.I)
+					change = 1;
 				tmp = now;
-				line.pop();
-				if (line.size() == 0) break;
+				do
+				{
+					line.pop();
+					if (line.size() == 0) break;
+					now = line.top();
+				} while (ios.bl && (strlen(a[now.x - 1]) == 0 || strlen(b[now.y - 1]) == 0));
 			}
 			int end_y = start.y;
 			output_buffer.append(to_string(start.x));
@@ -120,12 +168,35 @@ void printResult(stack<LineRelation> line, char** a, char** b, int n, int m,bool
 			}
 			if (end_y == m)
 				output_buffer.append("\\ No newline at end of file\n");
+			if (ios.I)//若要求每一行都包含特定字符串，则对已记录变化的行进行遍历
+			{
+				if (!change && strstr(a[start.x-1], ios.target.c_str()) == NULL)
+				{
+					change = 1;
+				}
+				if (!change) for (int i = start.y; i <= end_y; i++)
+				{
+					if (strstr(b[i-1], ios.target.c_str()) == NULL)
+					{
+						change = 1;
+						break;
+					}
+				}
+			}
 		}
-		strcat_s(gTerm.strout, output_buffer.c_str());//缓冲区推出
-		output_buffer = "";//缓冲区清空
-		if (now.op == '=');
+		if (!ios.qk && !ios.I)
+		{
+			strcat_s(gTerm.strout, output_buffer.c_str());//缓冲区推出
+			output_buffer = "";//缓冲区清空
+		}
+		if (now.op == '=');//行间相等的关系不做任何操作
 		if (line.size() <= 1) break;
 		line.pop();
 	}
-	return;
+	if (ios.I && change)
+	{
+		strcat_s(gTerm.strout, output_buffer.c_str());//缓冲区推出
+		output_buffer = "";//缓冲区清空
+	}
+	return change;
 }//通过调用栈获得结果输出

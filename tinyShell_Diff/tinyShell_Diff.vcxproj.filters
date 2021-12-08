@@ -35,9 +35,15 @@
     <Text Include="2.txt">
       <Filter>资源文件</Filter>
     </Text>
+    <Text Include="3.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="4.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="header.h">
+    <ClInclude Include="diffHeader.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

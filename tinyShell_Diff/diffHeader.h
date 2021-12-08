@@ -11,7 +11,8 @@ using namespace std;
 #define MAXLINE 512
 #define MAXFILE 16384
 #define MAX_LINE_LENGTH 2048
-#define MAX_LINE_COUNT 4096
+#define MAX_LINE_COUNT 8192
+
 struct Terminal {
 	char user[MAXLINE]; // 用户名
 	char mach[MAXLINE]; // 计算机名
@@ -24,18 +25,23 @@ struct LineRelation {
 	int x;
 	int y;
 	char op;
-};
-extern Terminal gTerm;
-extern bool diffSt; //是否为标准输出
-extern bool diffIgnoreUd;//是否忽略大小写
-extern bool diffIgnoreLb;//是否忽略行末空格
-extern bool diffIgnoreWb;//是否忽略所有空格
-extern bool diffIgnoreBl;//是否忽略空行
-extern bool diffQuick;//是否只显示有无不同
+};//经主体函数判断得出的行间关系
+struct diffios
+{
+	bool st;//是否为标准输出
+	bool ud;//是否忽略大小写
+	bool lb;//是否忽略行末空格
+	bool wb;//是否忽略所有空格
+	bool bl;//是否忽略空行
+	bool qk;//是否只显示有无不同
+	bool I;//是否指定特定字符串
+	string target;
+};//diff输入输出形式的封装
 
+extern Terminal gTerm;
 int readFileByLine(ifstream*, char**);
 int readStrinByLine(char**);
-int customStrcmp(char*, char*, bool, bool, bool, bool);
+int customStrcmp(char*, char*,diffios);
 int doDiff(int, char* []);
-void printResult(stack<LineRelation>, char**, char**, int, int,bool);
+bool printResult(stack<LineRelation>, char**, char**, int, int,diffios);
 #endif

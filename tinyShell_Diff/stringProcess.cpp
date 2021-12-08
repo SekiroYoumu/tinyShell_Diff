@@ -1,4 +1,4 @@
-#include "header.h"
+#include "diffHeader.h"
 int readFileByLine(ifstream* afile, char** a)
 {
 	int lineCount = 0;
@@ -23,7 +23,7 @@ int readStrinByLine(char** a)
 	{
 		int n = 0;
 		memset(tmp, '\0', MAX_LINE_LENGTH * sizeof(char));
-		while (*ptr != '\n' && n < MAX_LINE_LENGTH-1 && *ptr != '\0')
+		while (*ptr != '\n' && n < MAX_LINE_LENGTH - 1 && *ptr != '\0')
 		{
 			tmp[n] = *ptr;
 			n++; ptr++;
@@ -37,22 +37,22 @@ int readStrinByLine(char** a)
 	delete[] tmp;
 	return lineCount;
 }//按行读取strin，返回行数
-int customStrcmp(char* a, char* b, bool st, bool ignore_ud, bool ignore_lb, bool ignore_wb)
+int customStrcmp(char* a, char* b, diffios ios)
 {
 	bool enda, endb;
-	if (st) return strcmp(a, b);//Default
+	if (ios.st) return strcmp(a, b);//Default
 	else
 	{
 		int i, j;
 		for (i = 0, j = 0; a[i] != '\0' && b[j] != '\0';)
 		{
-			if ((a[i] == b[j]) || (abs(a[i] - b[j]) == 32 && ignore_ud))
+			if ((a[i] == b[j]) || (abs(a[i] - b[j]) == 32 && ios.ud))
 			{
 				i++, j++;
 			}
-			else if (a[i] == 32 && ignore_wb)
+			else if (a[i] == 32 && ios.wb)
 				i++;
-			else if (b[j] == 32 && ignore_wb)
+			else if (b[j] == 32 && ios.wb)
 				j++;
 			else if (a[i] > b[j]) return 1;
 			else if (a[i] < b[j]) return -1;
@@ -61,7 +61,7 @@ int customStrcmp(char* a, char* b, bool st, bool ignore_ud, bool ignore_lb, bool
 		}
 		if (i != j)
 		{
-			if (!ignore_lb) return (i > j ? 1 : -1);
+			if (!ios.lb) return (i > j ? 1 : -1);
 			else
 			{
 				if (enda == 0)
