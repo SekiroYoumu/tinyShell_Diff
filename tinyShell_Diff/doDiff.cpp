@@ -1,5 +1,6 @@
 #pragma once
 #include "diffHeader.h"
+/*格式化后的diff样本，按行分配，为避免局部变量的栈空间溢出而使用全局变量*/
 char* diffSampleA[MAX_LINE_COUNT];
 char* diffSampleB[MAX_LINE_COUNT];
 void copyPath(int* a, int* b, int d)
@@ -22,17 +23,18 @@ bool checkValidity(char* last, char* check)
 int doDiff(int argc, char* argv[])
 {
 	//1、命令读取与检验
-	diffios ios;//输出模式参数初始化
+	diffios ios;//输入输出模式参数初始化
 	if (argv[0] == NULL)
 	{
-		cerr << "Debug error:invalid augment !:(" << endl;
+		cerr << "Debug error:invalid argument for 'diff'" << endl;
 		return -1;
 	}
 	if (strcmp(argv[0], "diff") != 0)
 	{
-		cerr << "Debug error:Wrong citation or invalid augment!:(" << endl;
+		cerr << "Debug error:invalid argument for 'diff'" << endl;
 		return -1;
 	}
+	//以上表示解释器提供参数非法
 	if (!checkValidity(argv[0], argv[1])) return -1;
 	if (strcmp(argv[1], "--help") == 0)
 	{
@@ -76,7 +78,7 @@ int doDiff(int argc, char* argv[])
 		{
 			ios.I = 1;
 			errorFlag = 0;
-			i++;
+			i++;//若-I，则认定下一个参数为其指定的字符串
 			if (i == argc - 2)
 			{
 				cerr << "diff: missing operand after '" << argv[i] << "'" << endl << "diff: Try 'diff --help' for more information." << endl;
@@ -84,12 +86,13 @@ int doDiff(int argc, char* argv[])
 			}
 			else ios.target = argv[i];
 		}
-		if (errorFlag)
+		if (errorFlag)//如果以上都没没判断到，则说明这是无效参数
 		{
 			cerr << "diff: invalid option -- " << argv[i] << endl << "diff: Try 'diff --help' for more information." << endl;
 			return -1;
 		}
 	}
+	//2、文件读取
 	ifstream afile, bfile;
 	int n, m;
 	bool all_strin = 0;
@@ -100,8 +103,7 @@ int doDiff(int argc, char* argv[])
 		filenameA = gTerm.root;
 		filenameA.append(1, '/');
 		filenameA.append(gTerm.wdir);
-		filenameA.append(1, '/');
-		filenameA.append(argv[argc - 2]);
+		filenameA.append(argv[argc - 2]);//将root,wdir和传入参数连接起来，作为读取文件的位置(我的理解是前两个变量的结尾不带/，需要补)；后同
 		afile.open(filenameA);
 		if (afile.is_open() == false)
 		{
@@ -113,7 +115,7 @@ int doDiff(int argc, char* argv[])
 	else
 	{
 		all_strin = 1;
-		//debug：由于没有strin传入，故需要自己输入！
+		//debug：由于单独测试时没有strin传入，故需要自己输入
 		memset(gTerm.strin, 0, MAXFILE * sizeof(char));
 		cout << "Debug: Input strin:";
 		char* px = gTerm.strin;
@@ -125,8 +127,7 @@ int doDiff(int argc, char* argv[])
 			px++;
 		}
 		cin.clear();
-		cin.sync();
-		cout << "Debug: strin check:"<<endl<<gTerm.strin;
+		cin.sync();//清空cin流，避免影响后续读取
 
 		n = readStrinByLine(diffSampleA);
 	}
@@ -148,14 +149,14 @@ int doDiff(int argc, char* argv[])
 	}
 	else
 	{
-		if (all_strin == 1)
+		if (all_strin == 1)//解释器提供的strin只有一个，因此不支持从两个strin读入
 		{
 			cerr << "diff: two files from standard input stream is not supported" << endl;
 			return -1;
 		}
 		else
 		{
-			//debug：由于没有strin传入，故需要自己输入！
+			//debug：由于没有strin传入，故需要自己输入
 			memset(gTerm.strin, 0, MAXFILE * sizeof(char));
 			cout << "Debug: Input strin:";
 			char* px = gTerm.strin;
@@ -166,34 +167,33 @@ int doDiff(int argc, char* argv[])
 				*px = ch;
 				px++;
 			}
-			cout << "Debug: strin check:" << endl << gTerm.strin;
 			cin.clear();
-			cin.sync();
+			cin.sync();//清空cin流，避免影响后续读取
 
 			m = readStrinByLine(diffSampleB);
 		}
 	}
+	//3、最短路径计算：Myers' 算法主体
 	int* v = new int[2 * (n + m) + 1];
 	memset(v, 0, (2 * (n + m) + 1) * sizeof(int));
-	v = &v[n + m];
+	v = &v[n + m];//算法需要，将v置于新开空间的中间，使其构成一个[-n-m,n+m]的区间
 	int x, y;
 	int k, d;
 	int** result = new int* [n + m + 1];
-	//2、SES计算
-	for (d = 0; d <= n + m; d++)
+	for (d = 0; d <= n + m; d++)//遍历起始点到当前点的距离d，寻找在该d下所能到达的最远位置
 	{
 		result[d] = new int[2 * d + 1];
 		memset(result[d], 0, (2 * d + 1) * sizeof(int));
-		result[d] = &result[d][d];
-		copyPath(v, result[d], d); //record path
-		for (k = -d; k <= d; k += 2)
+		result[d] = &result[d][d];//算法需要，将result置于新开空间的中间，使其构成一个[-d,d]的区间
+		copyPath(v, result[d], d); //路径记录
+		for (k = -d; k <= d; k += 2)//遍历x，y之间的偏移k
 		{
 			if (k == -d || (k != d && v[k - 1] < v[k + 1]))
 				x = v[k + 1];
 			else
-				x = v[k - 1] + 1;
+				x = v[k - 1] + 1;//根据k和递推得到x与y
 			y = x - k;
-			while (x < n && y < m && customStrcmp(diffSampleA[x], diffSampleB[y], ios) == 0)
+			while (x < n && y < m && customStrcmp(diffSampleA[x], diffSampleB[y], ios) == 0)//x,y相同，可沿斜线走
 			{
 				x++;
 				y++;
@@ -201,28 +201,27 @@ int doDiff(int argc, char* argv[])
 			v[k] = x;
 			if (x >= n && y >= m)
 			{
-				//cout << "Now at " << d << " " << x << " " << y << " " << endl;
-				goto loopend;
+				goto loopend;//到达位置，退出多层循环
 			}
 		}
 	}
 loopend:;
-	v = &v[-n - m];
+	v = &v[-n - m];//在删除空间之前使已偏移的指针回到原位
 	delete[] v;
 	v = NULL;
-	//3、回溯路线
+	//4、根据保存的结果回溯路线
 	int last_x, last_y, last_k;
-	stack<LineRelation> line; //存放行间关系，由于关系是从后向前回溯得到的，故存放之栈中
+	stack<LineRelation> line; //存放行间关系，由于关系是从后向前回溯得到的，故存放栈中，利用栈FILO的特性进行后续分析
 	for (; d >= 0; d--)
 	{
 		k = x - y;
 		if (k == -d || (k != d && result[d][k - 1] < result[d][k + 1]))
 		{
-			last_k = k + 1; //表示这一步做了删除
+			last_k = k + 1; 
 		}
 		else
 		{
-			last_k = k - 1; //表示这一步做了新增
+			last_k = k - 1; 
 		}
 		last_x = result[d][last_k];
 		last_y = last_x - last_k;
@@ -230,31 +229,29 @@ loopend:;
 		{
 			while (last_x < x && last_y < y)
 			{
-				//printf("(%d,%d)->(%d,%d),%d->%d,d=%d\n", x - 1, y - 1, x, y, k, k, d);
-				line.push({ x,y,'=' });
+				line.push({ x,y,'=' });//表示这一步行间相等
 				x--;
 				y--;
 			}
-			//printf("(%d,%d)->(%d,%d),%d->%d,d=%d\n", last_x, last_y, x, y, last_k, k, d);
 		}
 		if (d > 0)
 		{
-			if (last_x == x)
+			if (last_x == x)//表示这一步做了新增
 				line.push({ x,y,'a' });
-			else if (last_y == y)
+			else if (last_y == y)//表示这一步做了删除
 				line.push({ x,y,'d' });
 		}
 		x = last_x;
 		y = last_y;
-		result[d] = &result[d][-d];
+		result[d] = &result[d][-d];//在回收空间之前使已偏移的指针回到原位
 		delete[] result[d];
 		result[d] = NULL;
 	}
+	delete[] result;
 	bool change = printResult(line, diffSampleA, diffSampleB, n, m, ios);
 	if (change && ios.qk) //是否为简洁输出
 	{
 		sprintf_s(gTerm.strout, "Files %s and %s differ\n", argv[argc - 2], argv[argc - 1]);
 	}
-	delete[] result;
 	return change;
 }//Diff主体函数,return -1错误，0无差别，1有差别，2从--help结束

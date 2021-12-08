@@ -8,9 +8,9 @@
 #include <string>
 using namespace std;
 #define MAXLINE 512
-#define MAXFILE 16384
-#define MAX_LINE_LENGTH 2048
-#define MAX_LINE_COUNT 8192
+#define MAXFILE 32768
+#define MAX_LINE_LENGTH 4096
+#define MAX_LINE_COUNT 16384
 
 struct Terminal {
 	char user[MAXLINE]; // 用户名
@@ -36,8 +36,9 @@ struct diffios
 	bool I = 0;//是否指定特定字符串
 	string target;
 };//diff输入输出形式的封装
-
+//全局变量声明
 extern Terminal gTerm;
+//函数声明
 int readFileByLine(ifstream*, char**);
 int readStrinByLine(char**);
 int customStrcmp(char*, char*, diffios);

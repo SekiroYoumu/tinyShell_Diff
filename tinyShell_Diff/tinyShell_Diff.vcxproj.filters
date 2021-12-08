@@ -47,6 +47,9 @@
     <Text Include="d2.txt">
       <Filter>资源文件</Filter>
     </Text>
+    <Text Include="stress.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diffHeader.h">
